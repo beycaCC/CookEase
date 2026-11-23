@@ -1,0 +1,11 @@
+@CookEase_HostAddress = http://localhost:8080
+
+GET {{CookEase_HostAddress}}/health/live
+
+###
+
+GET {{CookEase_HostAddress}}/health/ready
+
+###
+
+GET {{CookEase_HostAddress}}/openapi/v1.json
