@@ -1,15 +1,14 @@
-using CookEase.Domain.Entities;
+using CookEase.Domain.Enums;
 
 namespace CookEase.Application.Dtos.FridgeItems;
 
 public class GetFridgeItemsDto
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; } = null!;
-    public int Quantity { get; set; }
-    public string Unit { get; set; } = null!;
-    public DateTime ExpirationDate { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    
+    public Guid Id { get; init; }
+    public required string ItemName { get; init; }
+    public decimal Amount { get; init; }
+    public MeasurementUnit Unit { get; init; }
+    public DateOnly? ExpirationDate { get; init; }
+    public DateTimeOffset AddedAt { get; init; }
+    public StorageLocation StorageLocation { get; init; }
 }

@@ -62,6 +62,34 @@ Domain contains `User`, `FridgeItem`, `StorageLocation`, and `MeasurementUnit`. 
 
 The model links an Identity account (`AspNetUsers`) to a domain profile (`UserProfiles`) using the same primary key, and each profile owns many `FridgeItems`. Deleting an account cascades to its profile and inventory; deleting an individual item does not delete its owner. Identity owns email and password hashes. Future registration must create the account and matching profile together, and future use cases must enforce ownership. Migrations have not been created or applied, so these tables do not exist in the database yet.
 
+## Fridge-item endpoints
+
+The controller currently calls the repository directly and maps entities to response DTOs, without commands, queries, or an application service. All inventory endpoints require authentication.
+
+| Method | Route | Successful response |
+| --- | --- | --- |
+| GET | `/api/fridgeItems` | 200 with the user's items |
+| GET | `/api/fridgeItems/{id}` | 200 with one item |
+| POST | `/api/fridgeItems` | 201 with the created item and its Location header |
+| PUT | `/api/fridgeItems/{id}` | 204 after updating the item |
+| DELETE | `/api/fridgeItems/{id}` | 204 after deleting the item |
+
+POST and PUT accept `SaveFridgeItemDto`. PUT replaces all editable fields; an omitted or null expiration date clears it. IDs, ownership, and the original added timestamp are managed by the server.
+
+```json
+{
+  "itemName": "Milk",
+  "amount": 1.5,
+  "unit": 5,
+  "expirationDate": "2026-12-01",
+  "storageLocation": 1
+}
+```
+
+Units: `Piece = 1`, `Gram = 2`, `Kilogram = 3`, `Milliliter = 4`, `Liter = 5`. Storage: `Refrigerator = 1`, `Freezer = 2`, `Pantry = 3`, `Countertop = 4`. Invalid names, nonpositive quantities, and undefined enum values return 400. Missing items and items owned by another user return 404. Unauthenticated requests return 401.
+
+HTTP tests exercise these routes with an in-memory database and test authentication. Live PostgreSQL usage still requires migrations and an authenticated account with a matching user profile; registration/login endpoints have not been exposed yet.
+
 ## Run with Docker Desktop
 
 Requirements: Docker Desktop running with Linux containers. A local .NET SDK is only needed when building or debugging outside Docker.
@@ -80,7 +108,7 @@ Requirements: Docker Desktop running with Linux containers. A local .NET SDK is 
    | [API](http://localhost:8080/) | Identifies the running CookEase API |
    | [Liveness](http://localhost:8080/health/live) | Returns `Healthy` when the API is running |
    | [Readiness](http://localhost:8080/health/ready) | Returns `Healthy` only when the API can connect to PostgreSQL; otherwise HTTP 503 |
-   | [OpenAPI document](http://localhost:8080/openapi/v1.json) | Development-only API description; no business endpoints are defined yet |
+   | [OpenAPI document](http://localhost:8080/openapi/v1.json) | Development-only API description, including the fridge-item routes |
 
 Both containers use `restart: unless-stopped`. After the initial setup, they restart when Docker Desktop's engine starts, provided they were not explicitly stopped. A stopped project can be started from Docker Desktop or with `docker compose up --detach --wait`. After source changes, use the build command above again.
 
@@ -155,4 +183,4 @@ Integration considerations:
 
 ## Project status
 
-The backend foundation includes four Clean Architecture projects, the user and fridge-item domain models, Identity infrastructure, EF Core relationship mappings, PostgreSQL connectivity, health checks, and Docker Compose. Database migrations, application use cases, authentication endpoints, external resource integrations, and the iOS frontend remain to be implemented.
+The backend foundation includes four Clean Architecture projects, the user and fridge-item domain models, authenticated fridge-item CRUD endpoints, Identity infrastructure, EF Core relationship mappings, PostgreSQL connectivity, health checks, and Docker Compose. Database migrations, application services, authentication endpoints, external resource integrations, and the iOS frontend remain to be implemented.

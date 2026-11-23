@@ -1,4 +1,5 @@
 using CookEase.Infrastructure;
+using CookEase.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,7 @@ var connectionString = builder.Configuration.GetConnectionString("CookEase")
         "Set ConnectionStrings__CookEase before starting the API.");
 
 builder.Services.AddInfrastructure(connectionString);
+builder.Services.AddInfrastructureServices();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
@@ -15,6 +17,8 @@ builder.Services.AddProblemDetails();
 var app = builder.Build();
 
 app.UseExceptionHandler();
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
@@ -31,3 +35,5 @@ app.MapHealthChecks("/health/live", new HealthCheckOptions
 app.MapHealthChecks("/health/ready");
 
 app.Run();
+
+public partial class Program { }

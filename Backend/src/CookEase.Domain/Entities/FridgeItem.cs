@@ -21,6 +21,19 @@ public sealed class FridgeItem
             throw new ArgumentException("An owner is required.", nameof(userId));
         }
 
+        UpdateDetails(itemName, amount, unit, expirationDate, storageLocation);
+        Id = Guid.NewGuid();
+        UserId = userId;
+        AddedAt = DateTimeOffset.UtcNow;
+    }
+
+    public void UpdateDetails(
+        string itemName,
+        decimal amount,
+        MeasurementUnit unit,
+        DateOnly? expirationDate,
+        StorageLocation storageLocation)
+    {
         ArgumentException.ThrowIfNullOrWhiteSpace(itemName);
         itemName = itemName.Trim();
 
@@ -42,13 +55,10 @@ public sealed class FridgeItem
             throw new ArgumentOutOfRangeException(nameof(storageLocation));
         }
 
-        Id = Guid.NewGuid();
-        UserId = userId;
         ItemName = itemName;
         Amount = amount;
         Unit = unit;
         ExpirationDate = expirationDate;
-        AddedAt = DateTimeOffset.UtcNow;
         StorageLocation = storageLocation;
     }
 

@@ -76,6 +76,21 @@ public sealed class ModelAndIdentityTests
     }
 
     [Fact]
+    public void Invalid_update_leaves_the_item_unchanged()
+    {
+        var item = NewItem(Guid.NewGuid());
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => item.UpdateDetails(
+            "New name", 2, MeasurementUnit.Gram, new DateOnly(2027, 1, 1), (StorageLocation)999));
+
+        Assert.Equal("Milk", item.ItemName);
+        Assert.Equal(1, item.Amount);
+        Assert.Equal(MeasurementUnit.Liter, item.Unit);
+        Assert.Null(item.ExpirationDate);
+        Assert.Equal(StorageLocation.Refrigerator, item.StorageLocation);
+    }
+
+    [Fact]
     public void Model_links_accounts_profiles_and_owned_inventory_without_shadow_keys()
     {
         using var context = CreateContext();
